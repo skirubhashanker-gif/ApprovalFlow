@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approval Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .approval-list {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .approval-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .approval-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #ffc107; color: #856404; }
+        .status-approved { background: #28a745; color: white; }
+        .status-partial { background: #17a2b8; color: white; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .approval-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-approve { background: #28a745; color: white; }
+        .btn-reject { background: #dc3545; color: white; }
+        .btn-view { background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>Purchase Committee Approval Dashboard</h1>
+            <p>Manage and track approval requests</p>
+        </div>
+        
+        <div class="stats" id="stats">
+            <!-- Stats will be loaded here -->
+        </div>
+        
+        <div class="approval-list">
+            <div style="padding: 15px 20px; background: #f8f9fa; font-weight: bold; border-bottom: 2px solid #667eea;">
+                Pending Approvals
+            </div>
+            <div id="approvalList">
+                <!-- Approval items will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <h2>Approval Details</h2>
+            <div id="modalDetails"></div>
+            <textarea id="approvalComments" placeholder="Add comments..." rows="3" style="width: 100%; margin-top: 10px;"></textarea>
+            <div class="approval-buttons">
+                <button class="btn-approve" onclick="submitApproval(true)">Approve</button>
+                <button class="btn-reject" onclick="submitApproval(false)">Reject</button>
+                <button class="btn-view" onclick="viewPDF()">View PDF</button>
+                <button onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentApproval = null;
+        let currentRole = null;
+        
+        // Get role from URL or session (implement based on your auth)
+        function getCurrentRole() {
+            // This should come from your authentication system
+            return 'purchase'; // Example role
+        }
+        
+        function loadDashboard() {
+            fetch('/api/pending-approvals')
+                .then(response => response.json())
+                .then(data => {
+                    updateStats(data.stats);
+                    displayApprovals(data.approvals);
+                });
+        }
+        
+        function updateStats(stats) {
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total}</div>
+                    <div>Total Requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.pending}</div>
+                    <div>Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.approved}</div>
+                    <div>Approved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.rejected}</div>
+                    <div>Rejected</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+        }
+        
+        function displayApprovals(approvals) {
+            const container = document.getElementById('approvalList');
+            if (approvals.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center;">No pending approvals</div>';
+                return;
+            }
+            
+            container.innerHTML = approvals.map(approval => `
+                <div class="approval-item" onclick="viewApproval('${approval.approvalId}')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${approval.approvalId}</strong> - ${approval.formData.initiatingDept || 'N/A'}
+                            <br>
+                            <small>${new Date(approval.createdAt).toLocaleString()}</small>
+                        </div>
+                        <div>
+                            <span class="status-badge status-${approval.status}">${approval.status}</span>
+                            <br>
+                            <small>Total: Rs. ${approval.formData.totalValue}</small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function viewApproval(approvalId) {
+            currentApproval = approvalId;
+            currentRole = getCurrentRole();
+            
+            fetch(`/api/approval/${approvalId}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayModalDetails(data);
+                    document.getElementById('approvalModal').style.display = 'block';
+                });
+        }
+        
+        function displayModalDetails(approval) {
+            const details = `
+                <p><strong>Approval ID:</strong> ${approval.approvalId}</p>
+                <p><strong>Department:</strong> ${approval.formData.initiatingDept || 'N/A'}</p>
+                <p><strong>Total Value:</strong> Rs. ${approval.formData.totalValue}</p>
+                <p><strong>Items:</strong> ${approval.formData.items.length}</p>
+                <p><strong>Status:</strong> ${approval.status}</p>
+                <hr>
+                <h4>Current Approvals:</h4>
+                <ul>
+                    <li>Purchase: ${approval.approvals.purchase?.approved ? '✓' : '✗'} ${approval.approvals.purchase?.comments || ''}</li>
+                    <li>R&D: ${approval.approvals.rd?.approved ? '✓' : '✗'} ${approval.approvals.rd?.comments || ''}</li>
+                    <li>VP Operations: ${approval.approvals.vp?.approved ? '✓' : '✗'} ${approval.approvals.vp?.comments || ''}</li>
+                    <li>Finance: ${approval.approvals.finance?.approved ? '✓' : '✗'} ${approval.approvals.finance?.comments || ''}</li>
+                    <li>CEO: ${approval.approvals.ceo?.approved ? '✓' : '✗'} ${approval.approvals.ceo?.comments || ''}</li>
+                    <li>Director: ${approval.approvals.director?.approved ? '✓' : '✗'} ${approval.approvals.director?.comments || ''}</li>
+                </ul>
+            `;
+            document.getElementById('modalDetails').innerHTML = details;
+        }
+        
+        function submitApproval(approved) {
+            const comments = document.getElementById('approvalComments').value;
+            
+            fetch(`/api/update-approval/${currentApproval}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    role: currentRole,
+                    approved: approved,
+                    comments: comments
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                closeModal();
+                loadDashboard();
+            });
+        }
+        
+        function viewPDF() {
+            window.open(`/api/download-pdf/${currentApproval}`, '_blank');
+        }
+        
+        function closeModal() {
+            document.getElementById('approvalModal').style.display = 'none';
+            currentApproval = null;
+            document.getElementById('approvalComments').value = '';
+        }
+        
+        // Load dashboard on page load
+        loadDashboard();
+        // Refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+    </script>
+</body>
+</html>

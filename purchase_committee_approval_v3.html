@@ -1,0 +1,612 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{padding:1rem 0;font-family:var(--font-sans);color:var(--color-text-primary)}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.25rem}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.badge-pending{background:#fff3cd;color:#856404}
+.badge-approved{background:#d1fae5;color:#065f46}
+.badge-rejected{background:#fee2e2;color:#991b1b}
+.meta{font-size:12px;color:var(--color-text-secondary);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.steps{display:flex;gap:0;margin:10px 0 8px}
+.step{flex:1;text-align:center;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;top:10px;left:55%;width:88%;height:0.5px;background:var(--color-border-secondary)}
+.step-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid #ccc;background:#fff;margin:0 auto 3px;display:flex;align-items:center;justify-content:center;font-size:10px;position:relative;z-index:1}
+.step-dot.done{background:#d1fae5;border-color:#34d399;color:#065f46}
+.step-dot.active{background:#fef3c7;border-color:#f59e0b;color:#92400e}
+.step-dot.rejected{background:#fee2e2;border-color:#f87171;color:#991b1b}
+.step-label{font-size:9px;color:var(--color-text-secondary);line-height:1.2}
+.action-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+
+/* BUTTONS */
+.btn{padding:7px 16px;font-size:12px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);color:#fff;transition:all .15s;font-weight:500;backdrop-filter:blur(4px)}
+.btn:hover{background:rgba(255,255,255,0.28)}
+.btn-card{padding:6px 14px;font-size:12px;border-radius:8px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);transition:all .15s}
+.btn-card:hover{background:var(--color-background-secondary)}
+.btn-approve{background:rgba(16,185,129,0.85);border-color:rgba(16,185,129,0.5);color:#fff}
+.btn-approve:hover{background:rgba(16,185,129,1)}
+.btn-reject{background:rgba(239,68,68,0.75);border-color:rgba(239,68,68,0.5);color:#fff}
+.btn-reject:hover{background:rgba(239,68,68,0.95)}
+.btn-primary-card{background:var(--color-text-primary);color:var(--color-background-primary);border:0.5px solid var(--color-text-primary)}
+.btn-primary-card:hover{opacity:.85}
+.btn-pdf-card{border-color:#b45309;color:#b45309;background:transparent}
+.btn-pdf-card:hover{background:#fef3c7}
+.btn-primary-modal{background:rgba(255,255,255,0.95);color:#1e3a8a;border:none;font-weight:600}
+.btn-primary-modal:hover{background:#fff}
+.btn-pdf-modal{background:rgba(180,83,9,0.85);border-color:rgba(180,83,9,0.5);color:#fff}
+.btn-pdf-modal:hover{background:rgba(180,83,9,1)}
+
+.sap-tag{font-size:11px;padding:3px 8px;border-radius:6px;background:#dbeafe;color:#1e40af;border:0.5px solid #93c5fd}
+
+/* FORM ELEMENTS */
+.form-row{margin-bottom:10px}
+.form-row label{display:block;font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:3px;font-weight:500}
+.form-row input,.form-row select,.form-row textarea{
+  width:100%;font-size:13px;
+  background:rgba(255,255,255,0.15);
+  border:1px solid rgba(255,255,255,0.3);
+  border-radius:8px;padding:7px 10px;
+  color:#fff;outline:none;
+  backdrop-filter:blur(4px);
+}
+.form-row input::placeholder,.form-row textarea::placeholder{color:rgba(255,255,255,0.45)}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{
+  border-color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.22)
+}
+.form-row select option{background:#1e3a8a;color:#fff}
+.form-row textarea{height:52px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem;text-align:center}
+.stat-num{font-size:22px;font-weight:500;margin-bottom:2px}
+.stat-lbl{font-size:11px;color:var(--color-text-secondary)}
+.log-row{font-size:12px;color:var(--color-text-secondary);padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;gap:10px}
+.log-time{color:var(--color-text-tertiary);min-width:72px;flex-shrink:0}
+.empty{text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:13px}
+.chip{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+
+/* MODAL OVERLAY */
+.modal-bg{
+  display:none;position:fixed;inset:0;z-index:100;
+  align-items:flex-start;justify-content:center;
+  padding-top:16px;overflow-y:auto;
+  background:rgba(10,20,60,0.55);
+  backdrop-filter:blur(3px);
+}
+.modal-bg.open{display:flex}
+
+/* MODAL CARD — solid blue gradient, no transparency bleed */
+.modal{
+  background: linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 45%, #2563eb 100%);
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,0.25);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset;
+  padding:1.5rem;
+  width:min(580px,96vw);
+  margin-bottom:20px;
+  color:#fff;
+}
+.modal-wide{width:min(740px,98vw)}
+.modal-title{
+  font-size:16px;font-weight:600;margin-bottom:1rem;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  color:#fff;
+  display:flex;align-items:center;gap:8px
+}
+.modal-title .icon{font-size:18px}
+.modal-actions{display:flex;gap:8px;margin-top:1.25rem;justify-content:flex-end;padding-top:10px;border-top:1px solid rgba(255,255,255,0.15)}
+
+/* Section headings inside modal */
+.section-hd{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.07em;color:rgba(255,255,255,0.6);
+  margin:14px 0 7px;
+  padding-bottom:4px;
+  border-bottom:1px solid rgba(255,255,255,0.12)
+}
+
+/* Items table inside modal */
+.items-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:8px}
+.items-table th{
+  text-align:left;padding:5px 5px;
+  background:rgba(0,0,0,0.2);
+  color:rgba(255,255,255,0.8);font-weight:600;
+  border:0.5px solid rgba(255,255,255,0.15)
+}
+.items-table td{
+  padding:4px 5px;
+  border:0.5px solid rgba(255,255,255,0.12);
+  vertical-align:middle;color:#fff
+}
+.items-table tbody tr:hover{background:rgba(255,255,255,0.08)}
+.items-table tfoot td{background:rgba(0,0,0,0.2);font-weight:600;color:#fff}
+.items-table input{
+  width:100%;font-size:10px;border:none;
+  background:transparent;color:#fff;outline:none;
+}
+.items-table input:focus{background:rgba(255,255,255,0.12);border-radius:3px}
+.items-table input::placeholder{color:rgba(255,255,255,0.3)}
+
+/* radio labels in modal */
+.radio-group{display:flex;gap:14px;flex-wrap:wrap}
+.radio-group label{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;color:rgba(255,255,255,0.9)}
+
+/* Info box inside modal */
+.info-box{
+  padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:10px;
+  background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff
+}
+.info-box.success{background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.4)}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#1e3a8a;color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 18px;font-size:13px;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.toast.show{opacity:1}
+
+/* PDF preview modal special */
+.pdf-toolbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.2)}
+.pdf-body{background:#e8e8e8;padding:16px;max-height:75vh;overflow-y:auto}
+</style>
+
+<div class="app">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+    <div>
+      <div style="font-size:17px;font-weight:500">Purchase Committee Approval</div>
+      <div style="font-size:12px;color:var(--color-text-secondary)">SAP Info Record · PO Creation</div>
+    </div>
+    <button class="btn-card btn-primary-card" onclick="openNew()">+ New request</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem">
+    <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#d97706" id="s-pending">0</div><div class="stat-lbl">Pending</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#059669" id="s-approved">0</div><div class="stat-lbl">Fully approved</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:#2563eb" id="s-sap">0</div><div class="stat-lbl">SAP updated</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('all',this)">All</button>
+    <button class="tab" onclick="switchTab('pending',this)">Pending</button>
+    <button class="tab" onclick="switchTab('approved',this)">Approved</button>
+    <button class="tab" onclick="switchTab('log',this)">Activity log</button>
+  </div>
+
+  <div id="panel-all" class="panel active"><div id="list-all"></div></div>
+  <div id="panel-pending" class="panel"><div id="list-pending"></div></div>
+  <div id="panel-approved" class="panel"><div id="list-approved"></div></div>
+  <div id="panel-log" class="panel"><div id="activity-log"></div></div>
+</div>
+
+<!-- ── NEW REQUEST MODAL ── -->
+<div class="modal-bg" id="modal-new">
+<div class="modal">
+  <div class="modal-title"><span class="icon">📋</span> New Purchase Committee Request</div>
+  <div class="grid2">
+    <div class="form-row"><label>Date</label><input type="date" id="f-date"></div>
+    <div class="form-row"><label>Initiating Department</label><input type="text" id="f-dept" placeholder="e.g. Production"></div>
+  </div>
+  <div class="section-hd">Nature of Approval</div>
+  <div class="grid2" style="margin-bottom:10px">
+    <div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:5px">Purchase type</div>
+      <div class="radio-group">
+        <label><input type="radio" name="r-nature" value="Onetime Purchase" checked> Onetime</label>
+        <label><input type="radio" name="r-nature" value="Serial Purchase"> Serial</label>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:5px">Item category</div>
+      <div class="radio-group">
+        <label><input type="radio" name="r-item" value="New Item" checked> New item</label>
+        <label><input type="radio" name="r-item" value="Existing Item"> Existing item</label>
+      </div>
+    </div>
+  </div>
+  <div style="margin-bottom:10px">
+    <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:5px">Item type</div>
+    <div class="radio-group">
+      <label><input type="radio" name="r-itype" value="Boughtout" checked> Boughtout</label>
+      <label><input type="radio" name="r-itype" value="Sub-contract"> Sub-contract</label>
+    </div>
+  </div>
+  <div class="section-hd">Supplier Details</div>
+  <div class="grid3">
+    <div class="form-row"><label>Supplier Code</label><input type="text" id="f-supcode" placeholder="e.g. V1042"></div>
+    <div class="form-row"><label>Supplier Name</label><input type="text" id="f-supname" placeholder="Company name"></div>
+    <div class="form-row"><label>Vendor Name</label><input type="text" id="f-vendor" placeholder="Contact name"></div>
+  </div>
+  <div class="section-hd">Line Items</div>
+  <div style="overflow-x:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.15)">
+    <table class="items-table">
+      <thead><tr>
+        <th>Unit</th><th>SAP code</th><th>Description</th><th>Tax</th>
+        <th>Valid from</th><th>Valid to/Qty</th><th>Quoted ₹</th><th>Negotiated ₹</th>
+        <th>UOM</th><th>Exp. mo. qty</th><th>Procurement ₹</th>
+        <th>Exist. vendor</th><th>Exist. price ₹</th><th>Remarks</th>
+      </tr></thead>
+      <tbody id="items-body"></tbody>
+      <tfoot><tr>
+        <td colspan="10" style="text-align:right;font-size:11px;padding:5px">Total Procurement Value (₹)</td>
+        <td id="tbl-total" style="font-weight:600;padding:5px">0</td>
+        <td colspan="3"></td>
+      </tr></tfoot>
+    </table>
+  </div>
+  <button class="btn" style="font-size:12px;margin:8px 0;padding:5px 12px" onclick="addItemRow()">+ Add item row</button>
+  <div class="form-row"><label>CFT Remarks</label><textarea id="f-cft" placeholder="Cross-functional team remarks..."></textarea></div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('modal-new')">Cancel</button>
+    <button class="btn btn-primary-modal" onclick="submitRequest()">Submit for approval →</button>
+  </div>
+</div>
+</div>
+
+<!-- ── APPROVE/REJECT MODAL ── -->
+<div class="modal-bg" id="modal-action">
+<div class="modal">
+  <div class="modal-title"><span class="icon">✅</span> <span id="ma-title">Review</span></div>
+  <div id="ma-body"></div>
+  <div class="form-row" style="margin-top:12px"><label>Comment / remark (optional)</label><textarea id="ma-comment" placeholder="Add your note here..."></textarea></div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('modal-action')">Cancel</button>
+    <button class="btn btn-reject" onclick="doAction('reject')">✕ Reject</button>
+    <button class="btn btn-approve" onclick="doAction('approve')">✓ Approve</button>
+  </div>
+</div>
+</div>
+
+<!-- ── SAP UPDATE MODAL ── -->
+<div class="modal-bg" id="modal-sap">
+<div class="modal">
+  <div class="modal-title"><span class="icon">🔷</span> Update SAP — Info Record / PO Creation</div>
+  <div id="ms-body"></div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="form-row"><label>SAP PO / Info Record number</label><input type="text" id="ms-docnum" placeholder="e.g. PO-2026-0042"></div>
+    <div class="form-row"><label>Updated by</label><input type="text" id="ms-user" placeholder="Your name / SAP ID"></div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn" onclick="closeModal('modal-sap')">Cancel</button>
+    <button class="btn btn-primary-modal" onclick="doSAP()">✓ Confirm SAP update</button>
+  </div>
+</div>
+</div>
+
+<!-- ── PDF PREVIEW MODAL ── -->
+<div class="modal-bg" id="modal-pdf">
+<div class="modal modal-wide" style="padding:0;overflow:hidden">
+  <div class="pdf-toolbar">
+    <span style="font-size:14px;font-weight:600;color:#fff">📄 Approval Document — PDF Preview</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-pdf-modal" onclick="doPrint()">⬇ Download / Print PDF</button>
+      <button class="btn" onclick="closeModal('modal-pdf')">✕ Close</button>
+    </div>
+  </div>
+  <div class="pdf-body">
+    <div id="pdf-sheet" style="background:#fff;width:700px;margin:0 auto;padding:32px 36px;font-family:Arial,sans-serif;font-size:11px;color:#111;box-shadow:0 2px 12px rgba(0,0,0,.2)"></div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SIGNATORIES=['Purchase','R&D','VP - Operations','Finance & Accounts','CEO','Director'];
+let requests=[],actLog=[],activeId=null;
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function addLog(m){actLog.unshift({time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),m});if(actLog.length>80)actLog.pop()}
+function fmtNum(n){return Number(n||0).toLocaleString('en-IN')}
+
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  render();
+}
+
+function openNew(){
+  document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+  ['f-dept','f-supcode','f-supname','f-vendor','f-cft'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('items-body').innerHTML='';
+  addItemRow();
+  document.getElementById('modal-new').classList.add('open');
+}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
+function addItemRow(){
+  const tbody=document.getElementById('items-body');
+  const tr=document.createElement('tr');
+  const cols=['unit','sapcode','desc','tax','vfrom','vto','quoted','nego','uom','monthly','procval','exvendor','exprice','remarks'];
+  tr.innerHTML=cols.map(c=>`<td><input type="text" data-col="${c}" onblur="autoCalc(this)" placeholder=""></td>`).join('');
+  tbody.appendChild(tr);
+}
+
+function autoCalc(inp){
+  const tr=inp.closest('tr');
+  const qty=parseFloat(tr.querySelector('[data-col=monthly]')?.value||0);
+  const price=parseFloat(tr.querySelector('[data-col=nego]')?.value||0);
+  if(qty&&price){const pv=tr.querySelector('[data-col=procval]');if(pv)pv.value=(qty*price).toFixed(0)}
+  recalcTotal();
+}
+
+function recalcTotal(){
+  let tot=0;
+  document.querySelectorAll('#items-body tr').forEach(r=>{tot+=parseFloat(r.querySelector('[data-col=procval]')?.value||0)});
+  document.getElementById('tbl-total').textContent=fmtNum(tot);
+}
+
+function collectItems(){
+  const cols=['unit','sapcode','desc','tax','vfrom','vto','quoted','nego','uom','monthly','procval','exvendor','exprice','remarks'];
+  return Array.from(document.querySelectorAll('#items-body tr')).map(r=>{
+    const obj={};cols.forEach(c=>{obj[c]=r.querySelector(`[data-col=${c}]`)?.value||''});return obj;
+  });
+}
+
+function getTotal(items){return items.reduce((s,i)=>s+parseFloat(i.procval||0),0)}
+function getRadio(name){return document.querySelector(`input[name="${name}"]:checked`)?.value||''}
+
+function submitRequest(){
+  const dept=document.getElementById('f-dept').value.trim();
+  const sup=document.getElementById('f-supname').value.trim();
+  const items=collectItems().filter(i=>i.desc.trim());
+  if(!dept){toast('⚠ Enter initiating department');return}
+  if(!sup){toast('⚠ Enter supplier name');return}
+  if(!items.length){toast('⚠ Add at least one item');return}
+  const req={
+    id:uid(),date:document.getElementById('f-date').value,
+    dept,supCode:document.getElementById('f-supcode').value,
+    supName:sup,vendorName:document.getElementById('f-vendor').value,
+    nature:getRadio('r-nature'),itemCat:getRadio('r-item'),itemType:getRadio('r-itype'),
+    cft:document.getElementById('f-cft').value,items,total:getTotal(items),
+    currentStage:0,status:'pending',
+    sapDone:false,sapDoc:'',sapUser:'',signHistory:[],
+    created:new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+  };
+  requests.unshift(req);
+  addLog(`New request — ${sup} by ${dept} (₹${fmtNum(req.total)})`);
+  closeModal('modal-new');render();
+  toast('✓ Submitted for Purchase committee approval');
+}
+
+function openAction(id){
+  activeId=id;
+  const r=requests.find(x=>x.id===id);
+  const stage=SIGNATORIES[r.currentStage];
+  document.getElementById('ma-title').textContent=`Stage ${r.currentStage+1}/${SIGNATORIES.length}: ${stage}`;
+  document.getElementById('ma-comment').value='';
+  document.getElementById('ma-body').innerHTML=`
+    <div class="info-box">
+      <div style="font-size:13px;font-weight:600;margin-bottom:5px">${r.supName}${r.supCode?' ('+r.supCode+')':''}</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;opacity:.85">
+        <span>${r.nature}</span><span>${r.itemCat}</span><span>${r.itemType}</span>
+        <span>Dept: ${r.dept}</span><span>Total: ₹${fmtNum(r.total)}</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto;max-height:160px;overflow-y:auto;border-radius:8px;border:1px solid rgba(255,255,255,0.15)">
+      <table class="items-table"><thead><tr>
+        <th>SAP code</th><th>Description</th><th>Quoted ₹</th><th>Negotiated ₹</th><th>UOM</th><th>Procurement ₹</th>
+      </tr></thead>
+      <tbody>${r.items.map(i=>`<tr><td>${i.sapcode||'-'}</td><td>${i.desc}</td><td>${fmtNum(i.quoted)}</td><td>${fmtNum(i.nego)}</td><td>${i.uom||'-'}</td><td>${fmtNum(i.procval)}</td></tr>`).join('')}</tbody></table>
+    </div>`;
+  document.getElementById('modal-action').classList.add('open');
+}
+
+function doAction(action){
+  const r=requests.find(x=>x.id===activeId);if(!r)return;
+  const comment=document.getElementById('ma-comment').value;
+  const stage=SIGNATORIES[r.currentStage];
+  r.signHistory.push({stage,action,comment,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})});
+  if(action==='approve'){
+    if(r.currentStage<SIGNATORIES.length-1){
+      r.currentStage++;
+      addLog(`"${r.supName}" approved by ${stage} → ${SIGNATORIES[r.currentStage]}`);
+      toast(`✓ Approved by ${stage} → Next: ${SIGNATORIES[r.currentStage]}`);
+    } else {
+      r.status='approved';
+      addLog(`"${r.supName}" fully approved → ready for SAP PO`);
+      toast('🎉 All 6 approved! Ready for SAP PO creation');
+    }
+  } else {
+    r.status='rejected';
+    addLog(`"${r.supName}" rejected at ${stage}`);
+    toast(`✕ Rejected at ${stage}`);
+  }
+  closeModal('modal-action');render();
+}
+
+function openSAP(id){
+  activeId=id;
+  const r=requests.find(x=>x.id===id);
+  document.getElementById('ms-docnum').value='';
+  document.getElementById('ms-user').value='';
+  document.getElementById('ms-body').innerHTML=`
+    <div class="info-box success">
+      ✓ All 6 committee signatories approved.<br>Create Info Record / PO in SAP and enter the document number below.
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;opacity:.85">
+      <span>Supplier: <b>${r.supName}</b></span>
+      <span>Code: ${r.supCode||'—'}</span>
+      <span>Total: ₹${fmtNum(r.total)}</span>
+    </div>`;
+  document.getElementById('modal-sap').classList.add('open');
+}
+
+function doSAP(){
+  const r=requests.find(x=>x.id===activeId);if(!r)return;
+  r.sapDone=true;
+  r.sapDoc=document.getElementById('ms-docnum').value.trim()||'(unrecorded)';
+  r.sapUser=document.getElementById('ms-user').value.trim()||'—';
+  addLog(`"${r.supName}" → SAP PO/Info Record: ${r.sapDoc} by ${r.sapUser}`);
+  closeModal('modal-sap');render();
+  toast('✓ SAP document recorded successfully');
+}
+
+/* PDF */
+function openPDF(id){
+  activeId=id;
+  const r=requests.find(x=>x.id===id);
+  document.getElementById('pdf-sheet').innerHTML=buildPDFHTML(r);
+  document.getElementById('modal-pdf').classList.add('open');
+}
+
+function buildPDFHTML(r){
+  const tick=(c)=>c?'&#9745;':'&#9744;';
+  const sign=(label)=>{
+    const h=r.signHistory.find(s=>s.stage===label);
+    const ok=h&&h.action==='approve';
+    return `<div style="border:1px solid #ccc;border-radius:4px;padding:8px 6px;text-align:center;min-height:64px;background:${ok?'#f0faf4':'#fff'}">
+      <div style="font-size:10px;font-weight:bold;margin-bottom:4px;color:#1a3a6e">${label}</div>
+      ${ok?`<div style="font-size:9px;color:#1a7a45">&#10003; Approved</div><div style="font-size:8px;color:#666;margin-top:2px">${h.time}</div>${h.comment?`<div style="font-size:8px;color:#888;margin-top:2px">${h.comment}</div>`:''}`:`<div style="font-size:9px;color:#bbb">Pending</div>`}
+    </div>`;
+  };
+  const itemRows=r.items.map((it,i)=>`
+    <tr style="background:${i%2===0?'#fafafa':'#fff'}">
+      <td style="padding:4px 5px;border:0.5px solid #ddd">${it.unit||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd">${it.sapcode||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd">${it.desc||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:center">${it.tax||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:center">${it.vfrom||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:center">${it.vto||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:right">${fmtNum(it.quoted)}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:right">${fmtNum(it.nego)}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:center">${it.uom||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:right">${fmtNum(it.monthly)}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:right;font-weight:bold">${fmtNum(it.procval)}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd">${it.exvendor||''}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd;text-align:right">${fmtNum(it.exprice)}</td>
+      <td style="padding:4px 5px;border:0.5px solid #ddd">${it.remarks||''}</td>
+    </tr>`).join('');
+
+  return `
+  <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #1a3a6e;padding-bottom:12px">
+    <div style="font-size:17px;font-weight:bold;color:#1a3a6e;letter-spacing:.5px">PURCHASE COMMITTEE APPROVAL</div>
+    <div style="font-size:10px;color:#666;margin-top:3px">Confidential — Internal document</div>
+  </div>
+  <table style="width:100%;margin-bottom:12px;font-size:10px"><tr>
+    <td style="width:50%;vertical-align:top">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="padding:3px 0;color:#555;width:110px">Date</td><td style="font-weight:bold">${r.date}</td></tr>
+        <tr><td style="padding:3px 0;color:#555">Initiating Dept</td><td style="font-weight:bold">${r.dept}</td></tr>
+        <tr><td style="padding:3px 0;color:#555">Supplier Code</td><td>${r.supCode||'—'}</td></tr>
+        <tr><td style="padding:3px 0;color:#555">Supplier Name</td><td style="font-weight:bold">${r.supName}</td></tr>
+        <tr><td style="padding:3px 0;color:#555">Vendor Name</td><td>${r.vendorName||'—'}</td></tr>
+      </table>
+    </td>
+    <td style="width:50%;vertical-align:top;padding-left:20px">
+      <div style="margin-bottom:6px;font-weight:bold;color:#555;font-size:9px;text-transform:uppercase">Nature of Approval</div>
+      <div style="margin-bottom:4px">${tick(r.nature==='Onetime Purchase')} Onetime &nbsp;&nbsp; ${tick(r.nature==='Serial Purchase')} Serial</div>
+      <div style="margin-bottom:4px">${tick(r.itemCat==='New Item')} New Item &nbsp;&nbsp; ${tick(r.itemCat==='Existing Item')} Existing Item</div>
+      <div>${tick(r.itemType==='Boughtout')} Boughtout &nbsp;&nbsp; ${tick(r.itemType==='Sub-contract')} Sub-contract</div>
+      ${r.sapDone?`<div style="margin-top:8px;padding:5px 8px;background:#e6f1fb;border-radius:3px"><b style="color:#185fa5">SAP Doc:</b> ${r.sapDoc} · By: ${r.sapUser}</div>`:''}
+    </td>
+  </tr></table>
+  <div style="font-weight:bold;font-size:10px;color:#1a3a6e;margin-bottom:6px;text-transform:uppercase">Line Items</div>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:9px;margin-bottom:12px">
+    <thead><tr style="background:#1a3a6e;color:#fff">
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Unit</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">SAP Code</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Item Description</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Tax</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Valid From</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Valid To/Qty</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e;text-align:right">Quoted ₹</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e;text-align:right">Negotiated ₹</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">UOM</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e;text-align:right">Exp. Mo. Qty</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e;text-align:right">Procurement ₹</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Exist. Vendor</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e;text-align:right">Exist. Price ₹</th>
+      <th style="padding:5px;border:0.5px solid #1a3a6e">Remarks</th>
+    </tr></thead>
+    <tbody>${itemRows}</tbody>
+    <tfoot><tr style="background:#eef2fa">
+      <td colspan="10" style="padding:5px;border:0.5px solid #ddd;text-align:right;font-weight:bold;color:#1a3a6e">Total Procurement Value (₹)</td>
+      <td style="padding:5px;border:0.5px solid #ddd;text-align:right;font-weight:bold;color:#1a3a6e">${fmtNum(r.total)}</td>
+      <td colspan="3" style="border:0.5px solid #ddd"></td>
+    </tr></tfoot>
+  </table></div>
+  ${r.cft?`<div style="margin-bottom:12px;padding:6px 10px;background:#f8f8f4;border-left:3px solid #1a3a6e;font-size:10px"><b>CFT Remarks:</b> ${r.cft}</div>`:''}
+  <div style="font-weight:bold;font-size:10px;color:#1a3a6e;margin-bottom:8px;text-transform:uppercase">Committee Approvals</div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:16px">
+    ${SIGNATORIES.map(s=>sign(s)).join('')}
+  </div>
+  <div style="margin-top:12px;border-top:1px solid #eee;padding-top:8px;font-size:8px;color:#999;display:flex;justify-content:space-between">
+    <span>Generated: ${new Date().toLocaleString('en-IN')}</span>
+    <span>Submitted: ${r.created}</span>
+    <span>Status: ${r.status.toUpperCase()}</span>
+  </div>`;
+}
+
+function doPrint(){
+  const sheet=document.getElementById('pdf-sheet');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>Purchase Committee Approval</title>
+  <style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:0;padding:20px}
+  @page{size:A4 landscape;margin:15mm}table{border-collapse:collapse}
+  @media print{body{padding:0}}</style></head><body>${sheet.innerHTML}</body></html>`);
+  w.document.close();w.focus();
+  setTimeout(()=>w.print(),400);
+  toast('✓ PDF print dialog opened');
+}
+
+/* RENDER CARDS */
+function renderCard(r){
+  const stepsHtml=SIGNATORIES.map((s,i)=>{
+    const h=r.signHistory.find(x=>x.stage===s);
+    let cls='';
+    if(h&&h.action==='approve')cls='done';
+    else if(h&&h.action==='reject')cls='rejected';
+    else if(i===r.currentStage&&r.status==='pending')cls='active';
+    const icon=cls==='done'?'✓':cls==='rejected'?'✕':cls==='active'?'…':'';
+    return `<div class="step"><div class="step-dot ${cls}">${icon}</div><div class="step-label">${s}</div></div>`;
+  }).join('');
+
+  const badge=r.status==='approved'?'badge-approved':r.status==='rejected'?'badge-rejected':'badge-pending';
+  const bLabel=r.status==='approved'?'Approved':r.status==='rejected'?'Rejected':'Pending';
+
+  let actions='';
+  if(r.status==='pending') actions+=`<button class="btn-card btn-approve" style="border-color:#059669;color:#065f46" onclick="openAction('${r.id}')">Review / approve</button>`;
+  if(r.status==='approved'&&!r.sapDone) actions+=`<button class="btn-card btn-primary-card" onclick="openSAP('${r.id}')">→ Update SAP (PO)</button>`;
+  if(r.sapDone) actions+=`<span class="sap-tag">SAP: ${r.sapDoc} · ${r.sapUser}</span>`;
+  actions+=`<button class="btn-card btn-pdf-card" onclick="openPDF('${r.id}')">⬇ Export PDF</button>`;
+
+  return `<div class="card">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:8px">
+      <div>
+        <div style="font-size:14px;font-weight:500">${r.supName} ${r.supCode?`<span class="chip">${r.supCode}</span>`:''}</div>
+        <div class="meta" style="margin-top:3px">
+          <span>${r.nature}</span><span>${r.itemCat}</span><span>${r.itemType}</span>
+          <span>Dept: ${r.dept}</span><span>₹${fmtNum(r.total)}</span>
+          <span style="color:var(--color-text-tertiary)">${r.date}</span>
+        </div>
+      </div>
+      <span class="badge ${badge}" style="flex-shrink:0">${bLabel}</span>
+    </div>
+    <div class="steps">${stepsHtml}</div>
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px">${r.items.length} item(s)</div>
+    <div class="action-row">${actions}</div>
+  </div>`;
+}
+
+function render(){
+  const toHTML=arr=>arr.length?arr.map(renderCard).join(''):`<div class="empty">No requests here.</div>`;
+  document.getElementById('list-all').innerHTML=toHTML(requests);
+  document.getElementById('list-pending').innerHTML=toHTML(requests.filter(r=>r.status==='pending'));
+  document.getElementById('list-approved').innerHTML=toHTML(requests.filter(r=>r.status==='approved'));
+  document.getElementById('activity-log').innerHTML=actLog.length
+    ?actLog.map(l=>`<div class="log-row"><span class="log-time">${l.time}</span><span>${l.m}</span></div>`).join('')
+    :`<div class="empty">No activity yet.</div>`;
+  document.getElementById('s-total').textContent=requests.length;
+  document.getElementById('s-pending').textContent=requests.filter(r=>r.status==='pending').length;
+  document.getElementById('s-approved').textContent=requests.filter(r=>r.status==='approved').length;
+  document.getElementById('s-sap').textContent=requests.filter(r=>r.sapDone).length;
+}
+render();
+</script>
