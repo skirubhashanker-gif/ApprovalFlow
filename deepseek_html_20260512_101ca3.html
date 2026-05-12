@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Committee Approval Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header .date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .section-title {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            color: #333;
+        }
+
+        .section-body {
+            padding: 20px;
+        }
+
+        .approval-type {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .approval-group {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .approval-group h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .form-table th,
+        .form-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .form-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .form-table input,
+        .form-table select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .form-table input:focus,
+        .form-table select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .item-row {
+            position: relative;
+        }
+
+        .remove-row {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .add-row {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .total-section {
+            text-align: right;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .total-section strong {
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .approval-signatures {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .signature-field {
+            text-align: center;
+        }
+
+        .signature-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .signature-field input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-submit {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #218838;
+        }
+
+        .btn-preview {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-preview:hover {
+            background: #138496;
+        }
+
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PURCHASE COMMITTEE APPROVAL FORM</h1>
+            <div class="date" id="currentDate"></div>
+        </div>
+        
+        <div class="form-content">
+            <form id="approvalForm">
+                <!-- Approval Type Section -->
+                <div class="section">
+                    <div class="section-title">Approval Details</div>
+                    <div class="section-body">
+                        <div class="approval-type">
+                            <div class="approval-group">
+                                <h3>Purchase Type</h3>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="purchaseType" value="Onetime Purchase"> Onetime Purchase</label>
+                                    <label><input type="radio" name="purchaseType" value="Serial Purchase"> Serial Purchase</label>
+                                </div>
+                            </div>
+                            <div class="approval-group">
+                                <h3>Item Nature</h3>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="itemNature" value="New Item"> New Item</label>
+                                    <label><input type="radio" name="itemNature" value="Existing Item"> Existing Item</label>
+                                </div>
+                            </div>
+                            <div class="approval-group">
+                                <h3>Item Category</h3>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="itemCategory" value="Boughtout"> Boughtout</label>
+                                    <label><input type="radio" name="itemCategory" value="Sub-contract"> Sub-contract</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div>
+                                <label><strong>Supplier Code:</strong></label>
+                                <input type="text" name="supplierCode" style="width: 100%; padding: 8px; margin-top: 5px;">
+                            </div>
+                            <div>
+                                <label><strong>Supplier Name:</strong></label>
+                                <input type="text" name="supplierName" style="width: 100%; padding: 8px; margin-top: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="section">
+                    <div class="section-title">Purchase Items Details</div>
+                    <div class="section-body">
+                        <table class="form-table" id="itemsTable">
+                            <thead>
+                                <tr>
+                                    <th>Unit</th>
+                                    <th>SAP Item Code</th>
+                                    <th>Item Description</th>
+                                    <th>Tax Code</th>
+                                    <th>Price Validity From</th>
+                                    <th>Price Validity To</th>
+                                    <th>Quoted Price (Rs.)</th>
+                                    <th>Negotiated Price (Rs.)</th>
+                                    <th>UOM</th>
+                                    <th>Expected Monthly Consumption</th>
+                                    <th>Procurement Value (Rs.)</th>
+                                    <th>Existing Vendor</th>
+                                    <th>Existing Price</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                                <!-- Rows will be added dynamically -->
+                            </tbody>
+                        </table>
+                        <button type="button" class="add-row" onclick="addItemRow()">+ Add New Item</button>
+                        
+                        <div class="total-section">
+                            <strong>Total Procurement Value: Rs. <span id="totalValue">0.00</span></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Initiating Department -->
+                <div class="section">
+                    <div class="section-title">Department Information</div>
+                    <div class="section-body">
+                        <label><strong>Initiating Department:</strong></label>
+                        <input type="text" name="initiatingDept" style="width: 100%; padding: 8px; margin-top: 5px;">
+                        
+                        <label style="margin-top: 15px;"><strong>CFT Remarks:</strong></label>
+                        <textarea name="cftRemarks" rows="3" style="width: 100%; padding: 8px; margin-top: 5px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Approval Signatures -->
+                <div class="section">
+                    <div class="section-title">Approval Signatures</div>
+                    <div class="approval-signatures">
+                        <div class="signature-field">
+                            <label>Purchase</label>
+                            <input type="text" name="approval_purchase" placeholder="Name & Date">
+                        </div>
+                        <div class="signature-field">
+                            <label>R&D</label>
+                            <input type="text" name="approval_rd" placeholder="Name & Date">
+                        </div>
+                        <div class="signature-field">
+                            <label>VP - Operations</label>
+                            <input type="text" name="approval_vp" placeholder="Name & Date">
+                        </div>
+                        <div class="signature-field">
+                            <label>Finance & Accounts</label>
+                            <input type="text" name="approval_finance" placeholder="Name & Date">
+                        </div>
+                        <div class="signature-field">
+                            <label>CEO</label>
+                            <input type="text" name="approval_ceo" placeholder="Name & Date">
+                        </div>
+                        <div class="signature-field">
+                            <label>Director</label>
+                            <input type="text" name="approval_director" placeholder="Name & Date">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn-preview" onclick="previewPDF()">Preview PDF</button>
+                    <button type="button" class="btn-submit" onclick="submitForApproval()">Submit for Approval</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="approval-handler.js"></script>
+    <script>
+        // Set current date
+        document.getElementById('currentDate').innerHTML = `Date: ${new Date().toLocaleDateString()}`;
+        
+        // Initialize with 3 empty rows
+        let itemCounter = 0;
+        
+        function addItemRow(data = null) {
+            const tbody = document.getElementById('itemsBody');
+            const row = tbody.insertRow();
+            const rowId = itemCounter++;
+            
+            const fields = [
+                { type: 'text', name: `unit_${rowId}` },
+                { type: 'text', name: `sapCode_${rowId}` },
+                { type: 'text', name: `description_${rowId}` },
+                { type: 'text', name: `taxCode_${rowId}` },
+                { type: 'date', name: `validityFrom_${rowId}` },
+                { type: 'date', name: `validityTo_${rowId}` },
+                { type: 'number', name: `quotedPrice_${rowId}` },
+                { type: 'number', name: `negotiatedPrice_${rowId}`, onchange: 'updateProcurementValue(this)' },
+                { type: 'text', name: `uom_${rowId}` },
+                { type: 'number', name: `monthlyConsumption_${rowId}`, onchange: 'updateProcurementValue(this)' },
+                { type: 'number', name: `procurementValue_${rowId}`, readonly: true },
+                { type: 'text', name: `existingVendor_${rowId}` },
+                { type: 'text', name: `existingPrice_${rowId}` },
+                { type: 'text', name: `remarks_${rowId}` }
+            ];
+            
+            fields.forEach(field => {
+                const cell = row.insertCell();
+                const input = document.createElement('input');
+                input.type = field.type;
+                input.name = field.name;
+                if (field.onchange) input.setAttribute('onchange', field.onchange);
+                if (field.readonly) input.readOnly = true;
+                if (data && data[field.name]) input.value = data[field.name];
+                cell.appendChild(input);
+            });
+            
+            // Action cell
+            const actionCell = row.insertCell();
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.className = 'remove-row';
+            removeBtn.onclick = () => row.remove();
+            actionCell.appendChild(removeBtn);
+            
+            calculateTotal();
+        }
+        
+        function updateProcurementValue(element) {
+            const row = element.closest('tr');
+            const negotiatedPrice = parseFloat(row.cells[7]?.querySelector('input')?.value) || 0;
+            const consumption = parseFloat(row.cells[9]?.querySelector('input')?.value) || 0;
+            const procurementValue = negotiatedPrice * consumption;
+            const valueInput = row.cells[10]?.querySelector('input');
+            if (valueInput) valueInput.value = procurementValue.toFixed(2);
+            calculateTotal();
+        }
+        
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('#itemsBody tr').forEach(row => {
+                const valueInput = row.cells[10]?.querySelector('input');
+                if (valueInput && valueInput.value) {
+                    total += parseFloat(valueInput.value) || 0;
+                }
+            });
+            document.getElementById('totalValue').innerText = total.toFixed(2);
+        }
+        
+        function collectFormData() {
+            const formData = {
+                approvalDate: new Date().toISOString(),
+                purchaseType: document.querySelector('input[name="purchaseType"]:checked')?.value,
+                itemNature: document.querySelector('input[name="itemNature"]:checked')?.value,
+                itemCategory: document.querySelector('input[name="itemCategory"]:checked')?.value,
+                supplierCode: document.querySelector('input[name="supplierCode"]')?.value,
+                supplierName: document.querySelector('input[name="supplierName"]')?.value,
+                initiatingDept: document.querySelector('input[name="initiatingDept"]')?.value,
+                cftRemarks: document.querySelector('textarea[name="cftRemarks"]')?.value,
+                approvals: {
+                    purchase: document.querySelector('input[name="approval_purchase"]')?.value,
+                    rd: document.querySelector('input[name="approval_rd"]')?.value,
+                    vp: document.querySelector('input[name="approval_vp"]')?.value,
+                    finance: document.querySelector('input[name="approval_finance"]')?.value,
+                    ceo: document.querySelector('input[name="approval_ceo"]')?.value,
+                    director: document.querySelector('input[name="approval_director"]')?.value
+                },
+                items: [],
+                totalValue: document.getElementById('totalValue').innerText
+            };
+            
+            document.querySelectorAll('#itemsBody tr').forEach((row, index) => {
+                const item = {
+                    unit: row.cells[0]?.querySelector('input')?.value || '',
+                    sapCode: row.cells[1]?.querySelector('input')?.value || '',
+                    description: row.cells[2]?.querySelector('input')?.value || '',
+                    taxCode: row.cells[3]?.querySelector('input')?.value || '',
+                    validityFrom: row.cells[4]?.querySelector('input')?.value || '',
+                    validityTo: row.cells[5]?.querySelector('input')?.value || '',
+                    quotedPrice: row.cells[6]?.querySelector('input')?.value || '0',
+                    negotiatedPrice: row.cells[7]?.querySelector('input')?.value || '0',
+                    uom: row.cells[8]?.querySelector('input')?.value || '',
+                    monthlyConsumption: row.cells[9]?.querySelector('input')?.value || '0',
+                    procurementValue: row.cells[10]?.querySelector('input')?.value || '0',
+                    existingVendor: row.cells[11]?.querySelector('input')?.value || '',
+                    existingPrice: row.cells[12]?.querySelector('input')?.value || '',
+                    remarks: row.cells[13]?.querySelector('input')?.value || ''
+                };
+                formData.items.push(item);
+            });
+            
+            return formData;
+        }
+        
+        function showMessage(message, type = 'success') {
+            const msgDiv = document.getElementById('statusMessage');
+            msgDiv.textContent = message;
+            msgDiv.className = `status-message status-${type}`;
+            msgDiv.style.display = 'block';
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        function previewPDF() {
+            const formData = collectFormData();
+            if (!validateForm(formData)) return;
+            
+            // Store data for PDF generation
+            sessionStorage.setItem('pdfData', JSON.stringify(formData));
+            window.open('pdf-preview.html', '_blank');
+        }
+        
+        function validateForm(formData) {
+            if (!formData.purchaseType) {
+                showMessage('Please select purchase type', 'error');
+                return false;
+            }
+            if (formData.items.length === 0) {
+                showMessage('Please add at least one item', 'error');
+                return false;
+            }
+            return true;
+        }
+        
+        function submitForApproval() {
+            const formData = collectFormData();
+            if (!validateForm(formData)) return;
+            
+            // Check if all approvals are done
+            const approvals = formData.approvals;
+            const missingApprovals = [];
+            for (const [key, value] of Object.entries(approvals)) {
+                if (!value) missingApprovals.push(key.toUpperCase());
+            }
+            
+            if (missingApprovals.length > 0) {
+                showMessage(`Missing approvals from: ${missingApprovals.join(', ')}`, 'error');
+                return;
+            }
+            
+            // Submit to server
+            fetch('/api/submit-approval', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('Approval submitted successfully! Generating PDF...', 'success');
+                    generateAndDownloadPDF(formData);
+                } else {
+                    showMessage('Error submitting approval: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error submitting form. Please try again.', 'error');
+            });
+        }
+        
+        function generateAndDownloadPDF(data) {
+            // Create a temporary div for PDF generation
+            const pdfContent = document.createElement('div');
+            pdfContent.innerHTML = generatePDFHTML(data);
+            pdfContent.style.padding = '20px';
+            pdfContent.style.fontFamily = 'Arial, sans-serif';
+            
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `Purchase_Approval_${new Date().toISOString().slice(0,19)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+            
+            html2pdf().set(opt).from(pdfContent).save();
+        }
+        
+        function generatePDFHTML(data) {
+            let itemsHTML = '';
+            data.items.forEach(item => {
+                itemsHTML += `
+                    <tr>
+                        <td>${item.unit}</td>
+                        <td>${item.sapCode}</td>
+                        <td>${item.description}</td>
+                        <td>${item.taxCode}</td>
+                        <td>${item.validityFrom}</td>
+                        <td>${item.validityTo}</td>
+                        <td>${item.quotedPrice}</td>
+                        <td>${item.negotiatedPrice}</td>
+                        <td>${item.uom}</td>
+                        <td>${item.monthlyConsumption}</td>
+                        <td>${item.procurementValue}</td>
+                        <td>${item.existingVendor}</td>
+                        <td>${item.existingPrice}</td>
+                        <td>${item.remarks}</td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; }
+                        h1 { color: #667eea; text-align: center; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { background: #f0f2f5; padding: 8px; font-weight: bold; margin-bottom: 10px; }
+                        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+                        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+                        th { background: #f8f9fa; }
+                        .approval-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+                        .approval-item { border-top: 1px solid #ddd; padding-top: 5px; }
+                        .total { text-align: right; margin-top: 15px; font-size: 14px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>PURCHASE COMMITTEE APPROVAL FORM</h1>
+                        <p>Date: ${new Date(data.approvalDate).toLocaleDateString()}</p>
+                        <p>Status: APPROVED</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Approval Type Details</div>
+                        <p><strong>Purchase Type:</strong> ${data.purchaseType}</p>
+                        <p><strong>Item Nature:</strong> ${data.itemNature}</p>
+                        <p><strong>Item Category:</strong> ${data.itemCategory}</p>
+                        <p><strong>Supplier Code:</strong> ${data.supplierCode}</p>
+                        <p><strong>Supplier Name:</strong> ${data.supplierName}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Items Details</div>
+                        <table>
+                            <thead>
+                                <tr><th>Unit</th><th>SAP Code</th><th>Description</th><th>Tax</th><th>Valid From</th><th>Valid To</th><th>Quoted</th><th>Negotiated</th><th>UOM</th><th>Monthly Cons.</th><th>Proc. Value</th><th>Existing Vendor</th><th>Existing Price</th><th>Remarks</th></tr>
+                            </thead>
+                            <tbody>${itemsHTML}</tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="total">
+                        <strong>Total Procurement Value: Rs. ${data.totalValue}</strong>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Department Info</div>
+                        <p><strong>Initiating Department:</strong> ${data.initiatingDept}</p>
+                        <p><strong>CFT Remarks:</strong> ${data.cftRemarks}</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-title">Approvals</div>
+                        <div class="approval-grid">
+                            <div class="approval-item"><strong>Purchase:</strong> ${data.approvals.purchase}</div>
+                            <div class="approval-item"><strong>R&D:</strong> ${data.approvals.rd}</div>
+                            <div class="approval-item"><strong>VP - Operations:</strong> ${data.approvals.vp}</div>
+                            <div class="approval-item"><strong>Finance & Accounts:</strong> ${data.approvals.finance}</div>
+                            <div class="approval-item"><strong>CEO:</strong> ${data.approvals.ceo}</div>
+                            <div class="approval-item"><strong>Director:</strong> ${data.approvals.director}</div>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 30px; text-align: center; font-size: 10px; color: #999;">
+                        Generated on ${new Date().toLocaleString()}
+                    </p>
+                </body>
+                </html>
+            `;
+        }
+        
+        // Initialize with 3 rows
+        for (let i = 0; i < 3; i++) {
+            addItemRow();
+        }
+        
+        // Make functions global
+        window.addItemRow = addItemRow;
+        window.updateProcurementValue = updateProcurementValue;
+        window.previewPDF = previewPDF;
+        window.submitForApproval = submitForApproval;
+    </script>
+</body>
+</html>
